@@ -5,7 +5,7 @@ export async function GET(request: Request) {
     const exchangeResponse = await fetch('https://accounts.spotify.com/api/token', {
         method: 'POST',
         headers: {
-            'Authorization': `Basic ${Buffer.from(process.env.SPOTIFY_CLIENT_ID+":"+process.env.SPOTIFY_CLIENT_SECRET).toString('base64')}`,
+            'Authorization': `Basic ${Buffer.from(process.env.SPOTIFY_CLIENT_ID+":"+code).toString('base64')}`,
             'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: new URLSearchParams({
