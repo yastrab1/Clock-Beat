@@ -1,11 +1,21 @@
+import { Redis } from '@upstash/redis'
+import { auth } from "@clerk/nextjs/server";
+import { setClientToken } from '@/lib/redis';
+
 export async function GET(request: Request) {
+    const { userId } = await auth();
+    if (!userId) {
+        return new Response('Unauthorized', { status: 401 });
+    }
+
+
     const { searchParams } = new URL(request.url);
     const code = searchParams.get('code');
     console.log(code);
     const exchangeResponse = await fetch('https://accounts.spotify.com/api/token', {
         method: 'POST',
         headers: {
-            'Authorization': `Basic ${Buffer.from(process.env.SPOTIFY_CLIENT_ID+":"+process.env.SPOTIFY_CLIENT_SECRET).toString('base64')}`,
+            'Authorization': `Basic ${Buffer.from(process.env.SPOTIFY_CLIENT_ID + ":" + process.env.SPOTIFY_CLIENT_SECRET).toString('base64')}`,
             'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: new URLSearchParams({
@@ -25,8 +35,9 @@ export async function GET(request: Request) {
         }
     });
 
-    const currentTrack = await response.json();
-    return new Response(JSON.stringify(currentTrack), {
-        headers: { 'Content-Type': 'application/json' }
-    });
+
+
+
+    await setClientToken(userId, JSON.stringify(accessToken));
+    return new Response("Success", { status: 200 });
 }

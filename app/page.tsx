@@ -1,8 +1,9 @@
 import getTopTracks from "@/lib/spotify";
 import Image from "next/image";
+import getCurrentTrack from "@/lib/spotify";
 
 export default function Home() {
-  const topTracks = getTopTracks();
+  const topTracks = getCurrentTrack();
   topTracks.then(console.log);
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
