@@ -6,7 +6,6 @@ async function fetchWebApi(endpoint: string, method: string, body: any) {
       Authorization: `Bearer ${token}`,
     },
     method,
-    body:JSON.stringify(body)
   });
   return await res.json();
 }
