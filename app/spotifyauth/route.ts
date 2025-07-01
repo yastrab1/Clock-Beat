@@ -8,11 +8,11 @@ export async function GET(request: Request) {
             'Authorization': `Basic ${Buffer.from(process.env.SPOTIFY_CLIENT_ID+":"+process.env.SPOTIFY_CLIENT_SECRET).toString('base64')}`,
             'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: JSON.stringify({
-            grant_type: 'authorization_code',
-            code: code,
-            redirect_uri: process.env.SPOTIFY_REDIRECT_URI || ''
-        })
+        body: new URLSearchParams({
+            code: code || '',
+            redirect_uri: process.env.SPOTIFY_REDIRECT_URI || '',
+            grant_type: 'authorization_code'
+        }).toString()
     });
     const tokenResponse = await exchangeResponse.json();
     console.log(tokenResponse);
