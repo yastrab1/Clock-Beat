@@ -16,7 +16,7 @@ async function fetchWebApi(endpoint: string, method: string, body: any, token: s
 
 export default async function getCurrentTrack() {
     const {userId} = await auth();
-    const token = await getClientToken(userId || '');
+    const token = await getClientToken(userId || '') || '';
     return fetchWebApi(
-        'v1/me/player/currently-playing', 'GET', {}, Buffer.from(process.env.SPOTIFY_CLIENT_ID + ":" + process.env.SPOTIFY_CLIENT_SECRET).toString('base64'))
+        'v1/me/player/currently-playing', 'GET', {}, token)
 }

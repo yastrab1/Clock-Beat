@@ -36,6 +36,6 @@ export async function GET(request: Request) {
     });
 
 
-
-    return new Response(await response.json(), { status: 200 });
+    const currentSong = await response.json()
+    return currentSong;
 }

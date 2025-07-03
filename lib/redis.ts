@@ -9,6 +9,6 @@ export function setClientToken(userId: string, token: string){
     redis.set(userId, token);
 }
 
-export function getClientToken(userId: string){
+export function getClientToken(userId: string): Promise<string|null>{
     return redis.get(userId);
 }
