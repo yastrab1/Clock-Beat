@@ -1,11 +1,14 @@
-import getTopTracks from "@/lib/spotify";
-import Image from "next/image";
+import RhythmClockDemo from "@/components/RhythmClockDemo";
 import getCurrentTrack from "@/lib/spotify";
 
-export default async function Home() {
-  const topTracks = await getCurrentTrack();
-
-  return <div>
-    {topTracks}
-  </div>
+export default function Home() {
+  const currentTrack = getCurrentTrack()
+  currentTrack.then(data => {
+    console.log(data);
+  })
+  return (
+    <div>
+      <RhythmClockDemo />
+    </div>
+  );
 }
