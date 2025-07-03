@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     const tokenResponse = await exchangeResponse.json();
     console.log(tokenResponse);
     const accessToken = tokenResponse.access_token;
-
+    setClientToken(userId, JSON.stringify(accessToken));
     const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing?additional_types=track', {
         method: 'GET',
         headers: {
@@ -37,7 +37,5 @@ export async function GET(request: Request) {
 
 
 
-
-    await setClientToken(userId, JSON.stringify(accessToken));
-    return new Response("Success", { status: 200 });
+    return new Response(await response.json(), { status: 200 });
 }
