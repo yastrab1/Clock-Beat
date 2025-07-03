@@ -1,3 +1,4 @@
+'use server'
 import getCurrentTrack from "@/lib/spotify";
 import {searchYoutube} from "@/lib/youtube";
 

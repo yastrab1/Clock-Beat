@@ -1,3 +1,4 @@
+'use server'
 import { Redis } from "@upstash/redis";
 
 const redis = new Redis({
@@ -5,10 +6,10 @@ const redis = new Redis({
     token: process.env.UPSTASH_REDIS_TOKEN || '',
 })
 
-export function setClientToken(userId: string, token: string){
-    redis.set(userId, token);
+export async function setClientToken(userId: string, token: string){
+    await redis.set(userId, token);
 }
 
-export function getClientToken(userId: string): Promise<string|null>{
+export async function getClientToken(userId: string): Promise<string|null>{
     return redis.get(userId);
 }
