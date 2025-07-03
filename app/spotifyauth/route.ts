@@ -37,5 +37,5 @@ export async function GET(request: Request) {
 
 
     const currentSong = await response.json()
-    return currentSong;
+    return Response.json(currentSong);
 }
