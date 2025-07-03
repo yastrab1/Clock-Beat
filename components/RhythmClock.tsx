@@ -1,4 +1,6 @@
 'use client';
+import dynamic from 'next/dynamic'
+
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useBeatAnimation } from './useBeatAnimation';
@@ -12,40 +14,74 @@ interface RhythmClockProps {
   theme?: 'warm' | 'cool' | 'mono';
   /** Show subtle digital time */
   showTime?: boolean;
+  /** BPM of the current song */
+  bpm?: number;
 }
 
-export default function RhythmClock({
+function RhythmClockInternal({
   beatTimes = [],
   size = 320,
   theme = 'warm',
-  showTime = true
+  showTime = true,
+  bpm = 85
 }: RhythmClockProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Color themes
-  const themes = {
-    warm: {
-      primary: '#f4e4c1',
-      secondary: '#e8b4a0',
-      accent: '#d49c83',
-      particles: ['#f4e4c1', '#e8b4a0', '#d49c83', '#c78875']
-    },
-    cool: {
-      primary: '#a8dadc',
-      secondary: '#457b9d',
-      accent: '#1d3557',
-      particles: ['#a8dadc', '#457b9d', '#1d3557', '#f1faee']
-    },
-    mono: {
-      primary: '#f8f9fa',
-      secondary: '#dee2e6',
-      accent: '#6c757d',
-      particles: ['#f8f9fa', '#dee2e6', '#6c757d', '#495057']
-    }
-  };
+// Advanced BPM-based color palette system
+const getBPMColorPalette = (bpm: number) => {
+  if (bpm < 60) {
+    // Very slow - Deep blues and purples (ambient/drone)
+    return {
+      primary: '#2d1b69',
+      secondary: '#11047a',
+      accent: '#5b21b6',
+      particles: ['#2d1b69', '#11047a', '#5b21b6', '#7c3aed']
+    };
+  } else if (bpm < 80) {
+    // Slow - Cool blues and teals (lo-fi/chill)
+    return {
+      primary: '#0891b2',
+      secondary: '#0e7490',
+      accent: '#155e75',
+      particles: ['#0891b2', '#0e7490', '#155e75', '#22d3ee']
+    };
+  } else if (bpm < 100) {
+    // Medium slow - Warm oranges and yellows (indie/folk)
+    return {
+      primary: '#f59e0b',
+      secondary: '#d97706',
+      accent: '#b45309',
+      particles: ['#f59e0b', '#d97706', '#b45309', '#fbbf24']
+    };
+  } else if (bpm < 120) {
+    // Medium - Greens and earth tones (rock/pop)
+    return {
+      primary: '#059669',
+      secondary: '#047857',
+      accent: '#065f46',
+      particles: ['#059669', '#047857', '#065f46', '#10b981']
+    };
+  } else if (bpm < 140) {
+    // Fast - Reds and pinks (dance/electronic)
+    return {
+      primary: '#dc2626',
+      secondary: '#b91c1c',
+      accent: '#991b1b',
+      particles: ['#dc2626', '#b91c1c', '#991b1b', '#f87171']
+    };
+  } else {
+    // Very fast - Bright magentas and violets (hardcore/drum & bass)
+    return {
+      primary: '#c026d3',
+      secondary: '#a21caf',
+      accent: '#86198f',
+      particles: ['#c026d3', '#a21caf', '#86198f', '#e879f9']
+    };
+  }
+};
 
-  const colors = themes[theme];
+const colors = getBPMColorPalette(bpm);
 
   // Use custom hook for all beat-synced animations
   const { particles, clockScale, beatIntensity, glowIntensity, registerParticleElement } = useBeatAnimation(
@@ -206,3 +242,6 @@ export default function RhythmClock({
     </div>
   );
 }
+export default dynamic((()=> Promise.resolve(RhythmClockInternal)), {
+  ssr: false,
+})

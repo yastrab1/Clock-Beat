@@ -38,6 +38,7 @@ export default function RhythmClockDemo() {
       beatTimes={beatTimes}
       size={400}
       theme="warm"
+      bpm={95}
       showTime={true}
     />
   );
