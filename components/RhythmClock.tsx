@@ -1,20 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-
-interface Particle {
-  id: number;
-  x: number;
-  y: number;
-  baseX: number;
-  baseY: number;
-  size: number;
-  opacity: number;
-  speed: number;
-  angle: number;
-  pulsePhase: number;
-  color: string;
-}
+import React, { useState, useEffect, useRef } from 'react';
+import { useBeatAnimation } from './useBeatAnimation';
 
 interface RhythmClockProps {
   /** Array of timestamps (in milliseconds) when beats should occur */
@@ -34,10 +21,6 @@ export default function RhythmClock({
   showTime = true
 }: RhythmClockProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [beatIntensity, setBeatIntensity] = useState(0);
-  const [particles, setParticles] = useState<Particle[]>([]);
-  const lastBeatRef = useRef<number>(-1);
-  const animationFrameRef = useRef<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Color themes
@@ -64,40 +47,11 @@ export default function RhythmClock({
 
   const colors = themes[theme];
 
-  // Initialize particles
-  useEffect(() => {
-    const generateParticles = () => {
-      const particleCount = 1;
-      const newParticles: Particle[] = [];
-
-      for (let i = 0; i < particleCount; i++) {
-        newParticles.push({
-          id: i,
-          x: Math.random() * window.innerWidth,
-          y: Math.random() * window.innerHeight,
-          baseX: Math.random() * window.innerWidth,
-          baseY: Math.random() * window.innerHeight,
-          size: Math.random() * 3 + 1,
-          opacity: Math.random() * 0.6 + 0.2,
-          speed: Math.random() * 0.5 + 0.1,
-          angle: Math.random() * Math.PI * 2,
-          pulsePhase: Math.random() * Math.PI * 2,
-          color: colors.particles[Math.floor(Math.random() * colors.particles.length)]
-        });
-      }
-
-      setParticles(newParticles);
-    };
-
-    generateParticles();
-
-    const handleResize = () => {
-      generateParticles();
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [colors.particles]);
+  // Use custom hook for all beat-synced animations
+  const { particles, clockScale, beatIntensity, glowIntensity, registerParticleElement } = useBeatAnimation(
+    beatTimes,
+    colors.particles
+  );
 
   // Update current time smoothly
   useEffect(() => {
@@ -106,67 +60,6 @@ export default function RhythmClock({
     }, 100); // More frequent updates for smoother animation
 
     return () => clearInterval(timer);
-  }, []);
-
-  // Check for beats and update intensity
-  useEffect(() => {
-    const checkForBeat = () => {
-      const now = Date.now();
-
-      // Find the closest beat time within tolerance
-      const closestBeat = beatTimes.find((beatTime, index) => {
-        const timeDiff = Math.abs(now - beatTime);
-        return timeDiff <= 300 && index > lastBeatRef.current;
-      });
-
-      if (closestBeat !== undefined) {
-        const beatIndex = beatTimes.indexOf(closestBeat);
-        if (beatIndex > lastBeatRef.current) {
-          triggerBeat();
-          lastBeatRef.current = beatIndex;
-        }
-      }
-
-      // Gradually decrease beat intensity
-      setBeatIntensity(prev => Math.max(0, prev - 0.02));
-    };
-
-    const interval = setInterval(checkForBeat, 50);
-    return () => clearInterval(interval);
-  }, [beatTimes]);
-
-  const triggerBeat = useCallback(() => {
-    setBeatIntensity(1);
-  }, []);
-
-  // Animate particles
-  useEffect(() => {
-    const animateParticles = () => {
-      setParticles(prevParticles =>
-        prevParticles.map(particle => {
-          const time = Date.now() * 0.001;
-          const currentBeatIntensity = beatIntensity
-          const beatSway = currentBeatIntensity * 20 * Math.sin(time * 2 + particle.pulsePhase);
-          console.log(beatSway);
-          return {
-            ...particle,
-            x: particle.baseX + Math.sin(time * particle.speed + particle.angle) * 2 + beatSway,
-            y: particle.baseY + Math.cos(time * particle.speed * 0.7 + particle.angle) + beatSway * 0.5,
-            opacity: particle.opacity * (0.7 + currentBeatIntensity * 0.3)
-          };
-        })
-      );
-
-      animationFrameRef.current = requestAnimationFrame(animateParticles);
-    };
-
-    animationFrameRef.current = requestAnimationFrame(animateParticles);
-
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
   }, []);
 
   // Calculate hand positions with smooth animation
@@ -209,9 +102,7 @@ export default function RhythmClock({
     }).toLowerCase();
   };
 
-  // Clock scale with beat
-  const clockScale = 1 + beatIntensity * 0.05;
-  const glowIntensity = beatIntensity * 0.8;
+  // clockScale and glowIntensity come from the custom hook
 
   return (
     <div ref={containerRef} className="relative min-h-screen overflow-hidden flex items-center justify-center bg-black">
@@ -277,18 +168,20 @@ export default function RhythmClock({
       </div>
 
       {/* Ambient particles */}
-      {particles.map(particle => (
+      {particles.map((particle, index) => (
         <div
           key={particle.id}
+          ref={(el) => registerParticleElement(index, el)}
           style={{
             position: 'absolute',
-            left: particle.x,
-            top: particle.y,
+            left: particle.x, // Initial position only
+            top: particle.y,  // Animation will update via direct DOM manipulation
             width: particle.size,
             height: particle.size,
             borderRadius: '50%',
             backgroundColor: particle.color,
-            opacity: particle.opacity
+            opacity: particle.opacity, // Initial opacity only
+            pointerEvents: 'none'
           }}
         />
       ))}
