@@ -22,10 +22,19 @@ ydl_opts = {
 
 def librosaProcess():
     y, sr = librosa.load(os.path.abspath("out.mp3"))
-    beats = librosa.beat.beat_track(y=y, sr=sr)
+    bpm,beat_frames = librosa.beat.beat_track(y=y, sr=sr)
+    beats = librosa.frames_to_time(beat_frames, sr=sr)
     print(beats)
-    return {"BPM": beats[0].tolist(), "beatTimestamps": beats[1].tolist()}
+    return {"BPM": bpm.tolist(), "beatTimestamps": beats.tolist()}
+def madmonProcess():
+    from madmom.features.beats import RNNBeatProcessor, DBNBeatTrackingProcessor
 
+    proc = RNNBeatProcessor()
+    act = proc('your_audio_file.wav')
+
+    track = DBNBeatTrackingProcessor(fps=100)
+    beat_times = track(act)
+    return {"BPM":-1,"beatTimestamps":beat_times}
 
 def analyzeSongName(ytID):
     with YoutubeDL(ydl_opts) as ydl:

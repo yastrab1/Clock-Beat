@@ -2,7 +2,9 @@ import os
 import threading
 import time
 import webbrowser
+import dotenv
 
+dotenv.load_dotenv()
 SPOTIFY_CLIENT_ID = os.environ['SPOTIFY_CLIENT_ID']
 SPOTIFY_CLIENT_SECRET = os.environ['SPOTIFY_CLIENT_SECRET']
 SPOTIFY_REDIRECT_HOST = os.environ['SPOTIFY_REDIRECT_HOST']
@@ -89,4 +91,6 @@ def querySongOnYTMusic(track):
     return ID
 
 def queryBackendForBeats(ID):
-    requests.get(BACKEND_URL+ID)
+    response = requests.get(BACKEND_URL+ID).json()
+    print(response)
+    return response['beatTimestamps']

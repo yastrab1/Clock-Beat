@@ -13,20 +13,28 @@ token = spotify.get_token()
 print(f"{token} is my token in the main")
 track = spotify.get_current_track(token)
 trackName = track['item']['name']
+progressTime = int(track["progress_ms"])/1000
+requestTime = time.time()
+
+processedBeats = []
+
 ID = querySongOnYTMusic(trackName)
 beats = queryBackendForBeats(ID)
 
-while running:
-    for e in pygame.event.get():
-        if e.type == pygame.QUIT:
-            running = False
-    
-    win.fill((0,0,0))   
-    pygame.display.flip()
-    arduino.write(b"1\n")
-    time.sleep(0.2)
-    arduino.write(b"2\n")
-    time.sleep(0.2)
-    arduino.write(b"3\n")
-    time.sleep(0.2)
+for beat in beats:
+    processedBeats.append(beat-requestTime-progressTime)
+
+print(time.time(),requestTime,progressTime,processedBeats)
+for i in range(0,len(processedBeats)-1):
+    relativeTime = time.time() + processedBeats[i]
+    if relativeTime < 0:
+        print(relativeTime)
+        continue
+    print("sleeping for ",relativeTime )
+    time.sleep(relativeTime)
+    arduino.write(b'2\n')
+    print("beat")
+
+
+
 
