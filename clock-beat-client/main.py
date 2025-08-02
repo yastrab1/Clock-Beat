@@ -12,6 +12,7 @@ running = True
 token = spotify.get_token()
 print(f"{token} is my token in the main")
 track = spotify.get_current_track(token)
+print(track)
 trackName = track['item']['name']
 progressTime = int(track["progress_ms"])/1000
 requestTime = time.time()
@@ -22,11 +23,11 @@ ID = querySongOnYTMusic(trackName)
 beats = queryBackendForBeats(ID)
 
 for beat in beats:
-    processedBeats.append(beat-requestTime-progressTime)
+    processedBeats.append(beat+requestTime-progressTime)
 
 print(time.time(),requestTime,progressTime,processedBeats)
 for i in range(0,len(processedBeats)-1):
-    relativeTime = time.time() + processedBeats[i]
+    relativeTime = processedBeats[i] - time.time()
     if relativeTime < 0:
         print(relativeTime)
         continue
