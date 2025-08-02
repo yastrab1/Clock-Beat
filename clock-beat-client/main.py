@@ -7,7 +7,6 @@ from spotify import querySongOnYTMusic, queryBackendForBeats
 SERIAL_PORT = '/dev/ttyACM0'
 arduino = serial.Serial(SERIAL_PORT,9600,timeout=1)
 
-win = pygame.display.set_mode()
 running = True
 token = spotify.get_token()
 print(f"{token} is my token in the main")
